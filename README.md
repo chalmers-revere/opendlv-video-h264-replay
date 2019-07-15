@@ -1,7 +1,8 @@
 ## OpenDLV Microservice to decode h264 video frames from a given .rec file into a shared memory
 
 This repository provides source code to decode h264 video frames stored in a
-.rec file into a shared memory area for the OpenDLV software ecosystem.
+.rec file into a shared memory area for the OpenDLV software ecosystem. Other
+`Envelope`s contained in the .rec are replayed into an `OD4Session`.
 
 [![License: GPLv3](https://img.shields.io/badge/license-GPL--3-blue.svg
 )](https://www.gnu.org/licenses/gpl-3.0.txt)
@@ -47,7 +48,7 @@ version: '2' # Must be present exactly once at the beginning of the docker-compo
 services:    # Must be present exactly once at the beginning of the docker-compose.yml file
     video-h264-replay-amd64:
         build:
-            context: https://github.com/chalmers-revere/opendlv-video-h264-replay.git
+            context: https://github.com/chalmers-revere/opendlv-video-h264-replay.git#v0.0.2
             dockerfile: Dockerfile.amd64
         restart: on-failure
         network_mode: "host"
@@ -62,12 +63,12 @@ services:    # Must be present exactly once at the beginning of the docker-compo
 As this microservice is connecting to an OD4Session to receive h264 frames to
 decode them into a shared memory area using SysV IPC, the `docker-compose.yml`
 file specifies the use of `ipc:host`. The parameter `network_mode: "host"` is
-necessary to receive h264 frames broadcast from other microservices running
-in an `OD4Session` from OpenDLV. The folder `/tmp` is shared into the Docker
-container to provide tokens describing the shared memory area.
+necessary to broadcast other `Envelope`s in an `OD4Session` from OpenDLV. The
+folder `/tmp` is shared into the Docker container to provide tokens describing
+the shared memory area.
 The parameters to the application are:
 
-* `--cid=111`: Identifier of the OD4Session to listen for h264 frames
+* `--cid=111`: Identifier of the OD4Session to replay other `Envelope`s
 * `--id=2`: Optional identifier to listen only for those h264 frames with the matching senderStamp of the OD4Session
 * `--name=XYZ`: Name of the shared memory area to create for storing the ARGB image data
 * `--verbose`: Display decoding information and render the image to screen (requires X11; run `xhost +` to allow access to you X11 server)
