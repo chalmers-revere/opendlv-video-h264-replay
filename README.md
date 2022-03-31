@@ -48,7 +48,7 @@ version: '2' # Must be present exactly once at the beginning of the docker-compo
 services:    # Must be present exactly once at the beginning of the docker-compose.yml file
     video-h264-replay:
         build:
-            context: https://github.com/chalmers-revere/opendlv-video-h264-replay.git#v0.0.2
+            context: https://github.com/chalmers-revere/opendlv-video-h264-replay.git#v0.0.3
             dockerfile: Dockerfile
         restart: on-failure
         network_mode: "host"
