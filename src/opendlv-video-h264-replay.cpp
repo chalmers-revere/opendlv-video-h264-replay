@@ -38,6 +38,7 @@ int32_t main(int32_t argc, char **argv) {
         std::cerr << "         --cid:     CID of the OD4Session to replay other Envelopes" << std::endl;
         std::cerr << "         --id:      when using several instances, only decode h264 with this senderStamp; default: use the first ImageReading" << std::endl;
         std::cerr << "         --name:    name of the shared memory area to create" << std::endl;
+        std::cerr << "         --skip:    skip first n envelopes; default: 0" << std::endl;
         std::cerr << "         --verbose: print decoding information and display image" << std::endl;
         std::cerr << "Example: " << argv[0] << " --cid=111 --name=data --verbose" << std::endl;
     }
@@ -46,6 +47,7 @@ int32_t main(int32_t argc, char **argv) {
         const bool VERBOSE{commandlineArguments.count("verbose") != 0};
         bool isIDset{(commandlineArguments["id"].size() != 0)};
         uint32_t ID{isIDset ? static_cast<uint32_t>(std::stoi(commandlineArguments["id"])) : 0};
+        uint32_t SKIP{(commandlineArguments["skip"].size() != 0) ? static_cast<uint32_t>(std::stoi(commandlineArguments["skip"])) : 0};
 
         std::string recFile;
         for (auto e : commandlineArguments) {
@@ -140,6 +142,10 @@ int32_t main(int32_t argc, char **argv) {
                                     }
                                     sharedMemory->unlock();
                                     sharedMemory->notifyAll();
+
+                                    if (VERBOSE) {
+                                        std::clog << "Frame: " << sampleTimeStamp.seconds() << "." << sampleTimeStamp.microseconds() << std::endl;
+                                    }
                                 }
                             }
                         }
@@ -151,6 +157,10 @@ int32_t main(int32_t argc, char **argv) {
             constexpr bool THREADING{true};
             cluon::Player player(recFile, AUTOREWIND, THREADING);
 
+            if (0 < SKIP) {
+               float seekTo = float(SKIP)/float(player.totalNumberOfEnvelopesInRecFile());
+               player.seekTo(seekTo);
+            }
             while (player.hasMoreData() && od4.isRunning()) {
                 auto next = player.getNextEnvelopeToBeReplayed();
                 if (next.first) {
