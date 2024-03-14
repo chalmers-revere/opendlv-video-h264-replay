@@ -1,3 +1,5 @@
+Moved to https://git.opendlv.org.
+
 ## OpenDLV Microservice to decode h264 video frames from a given .rec file into a shared memory
 
 This repository provides source code to decode h264 video frames stored in a
